@@ -41,6 +41,8 @@ CREATE TABLE IF NOT EXISTS messages (
   preview           TEXT,
   r2_bucket         TEXT    NOT NULL DEFAULT 'mail-eml',
   r2_object_key     TEXT    NOT NULL DEFAULT '',
+  content           TEXT,
+  html_content      TEXT,
   received_at       TEXT    DEFAULT CURRENT_TIMESTAMP,
   is_read           INTEGER DEFAULT 0,
   FOREIGN KEY(mailbox_id) REFERENCES mailboxes(id)

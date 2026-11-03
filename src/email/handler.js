@@ -83,7 +83,12 @@ export async function handleEmailEvent(message, env, ctx) {
       if (r2 && rawBuffer) {
         await r2.put(objectKey, new Uint8Array(rawBuffer), { httpMetadata: { contentType: 'message/rfc822' } });
       }
-    } catch (e) { console.error('R2 put failed:', e); }
+    } catch (e) { console.error('R2 put failed:', e); objectKey = ''; }
+    if (!r2) objectKey = '';
+    // 未绑定 R2 时正文直接存 D1（单行上限约 2MB，超长截断）
+    const bodyLimit = 900000;
+    const storedText = r2 ? null : (textContent || '').slice(0, bodyLimit);
+    const storedHtml = r2 ? null : (htmlContent || '').slice(0, bodyLimit);
 
     const preview = String(
       (textContent?.trim() ? textContent : (htmlContent || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()) || ''
@@ -120,9 +125,9 @@ export async function handleEmailEvent(message, env, ctx) {
     } catch (_) { toAddrs = resolvedRecipient || toHeader || ''; }
 
     await DB.prepare(`
-      INSERT INTO messages (mailbox_id, sender, to_addrs, subject, verification_code, preview, r2_bucket, r2_object_key)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(mailboxId, sender, String(toAddrs || ''), subject || '(无主题)', verificationCode || null, preview || null, 'mail-eml', objectKey || '').run();
+      INSERT INTO messages (mailbox_id, sender, to_addrs, subject, verification_code, preview, r2_bucket, r2_object_key, content, html_content)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(mailboxId, sender, String(toAddrs || ''), subject || '(无主题)', verificationCode || null, preview || null, 'mail-eml', objectKey || '', storedText, storedHtml).run();
   } catch (err) {
     console.error('Email event handling error:', err);
   }
