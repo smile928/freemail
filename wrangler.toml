@@ -1,37 +1,23 @@
 name = "mailfree"
-# name = "mail-exhibit"
 main = "src/server.js"
 compatibility_date = "2024-01-01"
-keep_vars=true
+keep_vars = true
 
-# D1 数据库绑定
+routes = [
+  { pattern = "mail.clinamia.com", custom_domain = true }
+]
+
 [[d1_databases]]
 binding = "TEMP_MAIL_DB"
-database_name = "mail_free_db" #你的d1数据库名称
-database_id = "b6711963-dd4b-4071-a531-512317880c19" # 你的database_id
-# 登录会话过期时间（单位：天，默认7天）
-# 环境变量
+database_name = "freemail"
+database_id = "721d2b88-61e8-49de-81d9-a4ad5b5cd8f7"
+
+# 非敏感变量；ADMIN_PASSWORD / JWT_TOKEN 通过 wrangler secret 设置
 [vars]
-# FORWARD_RULES="[{"prefix":"vip","email":"a@example.com"},{"prefix":"*","email":"example@qq.com"}]"
-ADMIN_NAME=""
-ADMIN_PASSWORD=""
-GUEST_PASSWORD="guest"
-JWT_TOKEN="dfvhluhdaslufhvdv"
-JWT_TOKENGUEST_PASSWORD="dfsfsfxzcv"
-SESSION_EXPIRE_DAYS="365"
-MAIL_DOMAIN="你的域名列表"
-RESEND_API_KEY="RESEND发件密钥"
-SENDFLARE_API_KEY="SENDFLARE发件密钥"
-CYBERPERSONS_API_KEY="CYBERPERSONS发件密钥"
+ADMIN_NAME = "admin"
+SESSION_EXPIRE_DAYS = "365"
+MAIL_DOMAIN = "clinamia.com"
 
-
-# 静态资源目录（Workers + Assets）
 [assets]
 directory = "public"
-# 显式指定绑定名，确保在 Worker 中通过 env.ASSETS 可用
 binding = "ASSETS"
-
-
-# wrangler.toml (wrangler v3.88.0^) 日志服务
-# [observability.logs]
-# enabled = true
